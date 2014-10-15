@@ -5,7 +5,7 @@ class Game
 
   class InputError < StandardError
   end
-
+  #a comment
   def play
     self.board = Board.new
     self.turn = :white
