@@ -6,7 +6,12 @@ class SteppingPiece < Piece
 
     get_diffs.each do |diff|
       x, y = position.first + diff.first, position.last + diff.last
-      moves << [x, y] if x.between?(0, 7) && y.between?(0, 7)
+      next unless x.between?(0, 7) && y.between?(0, 7)
+      new_move = Move.new
+      new_move.start = position
+      new_move.destination = [x, y]
+      new_move.sequence = []
+      moves << new_move
     end
 
     moves

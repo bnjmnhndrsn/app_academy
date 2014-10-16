@@ -2,6 +2,6 @@ require_relative 'sliding'
 
 class Queen < SlidingPiece
   def get_diffs
-    ChessConstants::DIAGONAL + ChessConstants::STRAIGHTS
+    ChessConstants::DIAGONALS + ChessConstants::STRAIGHTS
   end
 end
