@@ -6,10 +6,14 @@ class BoardUI
   
   def initialize(size = 8)
     @size = size
-    @cursor = [0,0]
+    @cursor = nil
     @grid = nil
     @flash = nil
     @selected = []
+  end
+  
+  def load(grid)
+    @grid = grid
   end
   
   def display(spaces: 1, message: nil)
@@ -35,6 +39,7 @@ class BoardUI
   end
   
   def get_selection(message)
+    @cursor ||= [0, 0]
     selection = nil
     until selection
       begin
