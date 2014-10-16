@@ -6,10 +6,14 @@ require_relative 'bishop'
 require_relative 'rook'
 require_relative 'pawn'
 require_relative 'chess_constants'
-require 'colorize'
+require 'debugger'
+#require 'colorize'
 
 class Board
-  attr_accessor :selected
+  
+  def initialize(grid = nil)
+    @grid = grid || Board.create_empty_grid
+  end
   
   def self.make_starting_board
     self.new.populate_board
@@ -26,17 +30,18 @@ class Board
     ChessConstants::DEFAULT_BOARD.each do |piece, colors|
       colors.each do |color, positions|
         positions.each do |pos|
-          self[pos] = piece.new(self, pos, color))
+          self[pos] = piece.new(self, pos, color)
         end
       end
     end
+    
+    self
   end
   
   def serialize
     @grid.map.with_index do |row|
       row.map do |space|
-        space.nil? ? ChessConstants::SKINS[nil] : 
-        ChessConstants::SKINS[space.color][space.class]
+        space.nil? ? ChessConstants::SKINS[nil] : ChessConstants::SKINS[space.color][space.class]
       end
     end
   end 
@@ -51,28 +56,18 @@ class Board
       end.join(' ')
     end.join("\n")
   end 
-
-  def initialize(grid)
-    @grid = grid || Board.create_empty_grid
-    @selected = [6,4]
-  end
   
   def valid_move?(from, to)
-    !attacking_self?(from, to) && on_board?(to)
+    on_board?(to) && !attacking_self?(from, to)
   end
   
-  def validate_from(from)
-    
+  def attacking_self?(from, to)
+    p self.class, from, to
+    self[to].is_a?(Piece) && self[from].color == self[to].color
   end
   
-  def validate_to(from, to)
-    if @board.will_result_in_check?(turn, move.first, move.last)
-      raise MoveError.new("Don't check yourself before you wreck yourself.")
-    end
-  end
-
-  def attacking_self(from, to)
-    self[to].nil? || self[from].color == self[w, z].color
+  def on_board?(pos)
+    pos.first.between?(0, 7) && pos.last.between?(0, 7)
   end
 
   def move_piece!(from, to)
@@ -91,13 +86,20 @@ class Board
   
   def search_pieces(&blk)
     if block_given?
-      @grid.flatten.compact.find { |piece| blk.call(piece) }
+      @grid.flatten.compact.find_all { |piece| blk.call(piece) }
     else
       @grid.flatten.compact
+    end
   end
 
   def all_possible_moves(color)
-    search_pieces { |piece| piece.color == color }.map(&:moves).flatten
+    moves = []
+    search_pieces { |piece| piece.color == color }.each do |piece|
+      piece.moves.each do |move|
+        moves << {from: piece.position, to: move}
+      end
+    end
+    moves
   end
 
   def will_result_in_check?(color, from, to)
@@ -111,28 +113,30 @@ class Board
   end
 
   def checkmate?(color)
-    all_possible_moves(color).all? do |move|
-      will_result_in_check?(color, move)
+    all_possible_moves(color).all? do |hash|
+      will_result_in_check?(color, hash[:from], hash[:to])
     end
   end
 
   def clone_board
-    new_board = Board.create_empty_grid
+    new_board = Board.new
     
     search_pieces.each do |piece|
       new_piece = piece.class.new(new_board, piece.position.dup, piece.color)
       new_piece.moved = piece.moved if piece.respond_to?(:moved)
-      new_board[new_piece.position] = cloned_piece
+      new_board[new_piece.position] = new_piece
     end
     
     new_board
   end
 
   def [](coord)
+    return nil unless coord.first.between?(0, 7) && coord.last.between?(0, 7)
     @grid[coord.first][coord.last]
   end
 
   def []=(coord, val)
+    return nil unless coord.first.between?(0, 7) && coord.last.between?(0, 7)
     @grid[coord.first][coord.last] = val
   end
 

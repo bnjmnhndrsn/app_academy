@@ -2,7 +2,7 @@ require_relative 'piece'
 
 class SteppingPiece < Piece
   
-  def moves_on_board
+  def moves
     moves = []
 
     get_diffs.each do |diff|

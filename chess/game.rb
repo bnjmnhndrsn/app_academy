@@ -1,8 +1,8 @@
 require_relative 'board'
+require_relative 'board_ui'
 require 'io/console'
 
 class Game
-  attr_accessor :board, :turn
 
   class InputError < StandardError
   end
@@ -11,35 +11,46 @@ class Game
   end
 
   def play
-    self.ui = BoardUI.new(ChessConstants::SKINS)
-    self.board = Board.new
-    self.turn = :white
+    @ui = BoardUI.new
+    @board = Board.make_starting_board
+    @turn = :white
 
-    until board.checkmate?(turn)
+    until @board.checkmate?(@turn)
       take_turn
       change_turn
     end
-
-    ui.render(board.serialize)
-    ui.print("Checkmate! #{turn.capitalize} loses!")
+    
+    @ui.grid = board.serialize
+    @ui.print("Checkmate! #{turn.capitalize} loses!")
   end
   
   def change_turn
-    self.turn = (turn == :white ? :black : :white)
+    @turn = (@turn == :white ? :black : :white)
   end
   
   def take_turn
-    ui.place_cursor( (turn == :white ? 7 : 0 ), 4)
-    from_square = ui.get_selection
-    board.validate_from(turn, from_square)
-    to_square = ui.get_selection
-    board.validate_to(turn, from_square)
-    board.move_piece!(move.first, move.last)
-    ui.clear_selection
+    @ui.grid = @board.serialize
+    @ui.cursor = [(@turn == :white ? 7 : 0 ), 4]
+    from = @ui.get_selection("Select a piece to move.")
+    validate_from(@turn, from)
+    to = @ui.get_selection("Select a destination.")
+    validate_to(@turn, from, to)
+    @board.move_piece!(from, to)
+    @ui.selection = []
   rescue MoveError => e
-    puts e.message
+    @ui.flash = e.message
     retry
-
+  end
+  
+  def validate_from(turn, from)
+    raise MoveError.new("There's no piece there!") if @board[from].nil?
+    raise MoveError.new("Not your piece!") if @board[from].color != @turn
+  end
+  
+  def validate_to(turn, from, to)
+    raise MoveError.new("You can't go there!") unless @board[from].moves.include?(to)
+    raise MoveError.new("You can't kill your own piece") if @board.attacking_self?(from, to) 
+    raise MoveError.new("You can't put yourself in check.") if @board.will_result_in_check?(turn, from, to)
   end
 end
 

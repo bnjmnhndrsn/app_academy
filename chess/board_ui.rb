@@ -2,16 +2,17 @@ require 'io/console'
 
 class BoardUI
   
-  attr_accessor :grid
+  attr_accessor :grid, :selected, :cursor, :flash
   
   def initialize(size = 8)
     @size = size
     @cursor = [0,0]
     @grid = nil
+    @flash = nil
     @selected = []
   end
   
-  def display(spaces = 1)
+  def display(spaces: 1, message: nil)
     raise "No grid to display!" if @grid.nil?
     
     first_row = ("a".."z").to_a[0...@size].join(" " * spaces)
@@ -30,32 +31,24 @@ class BoardUI
     end.join("\n")
     
     puts " #{first_row}\n#{rows}"
+    puts message if message
   end
   
   def get_selection(message)
-    current_message = message
     selection = nil
     until selection
       begin
         system("clear")
-        display
-        print(current_message) if current_message
+        display(message: (@flash.nil? ? message : @nil))
         input = STDIN.getch
         selection = process_input(input)
+        @flash  = nil
       rescue InputError => e
-        current_message = e.message
+        @flash = e.message
         retry
       end
     end
     selection
-  end
-  
-  def place_cursor(coord)
-    @cursor = coord
-  end
-  
-  def clear_selection
-    @selected = []
   end
   
   def process_input(input)
@@ -83,7 +76,3 @@ end
 
 class InputError < RuntimeError
 end
-
-ui = BoardUI.new
-ui.grid = Array.new(8) { Array.new(8) { "|" } }
-p ui.get_selection("Get a selection")

@@ -3,15 +3,15 @@ require_relative 'piece'
 class Pawn < Piece
   attr_accessor :moved
 
-  def moves_on_board
+  def moves
     moves = []
-    if valid_move?(single_advance)
+    if @board.valid_move?(position, single_advance)
       moves << single_advance
-      moves << double_advance if moved && @board.valid_move?(double_advance)
+      moves << double_advance if moved && @board.valid_move?(position, double_advance)
     end  
     
     moves += [attack_left, attack_right].select do |move|
-      @board.on_board?(move) && @board.attacking?(position, move)
+      @board.valid_move?(position, move) && @board.attacking?(position, move)
     end
 
   end
