@@ -1,3 +1,4 @@
+require 'debugger'
 class Piece
   
   DIFFS = {
@@ -9,7 +10,7 @@ class Piece
     ]
   }
   
-  attr_reader :color
+  attr_reader :color, :kinged
   
   def initialize(color, position, board)
     @color, @position, @board, @kinged = color, position, board, false
@@ -17,30 +18,70 @@ class Piece
   
   def perform_slide(dest)
     possible_moves = get_diffs.map do |diff|
-      [position.first + diff.first, position.last + diff.last]
+      [@position.first + diff.first, @position.last + diff.last]
     end
     
-    possible_moves.include?(dest) && board[dest].empty?
+    valid = possible_moves.include?(dest) && @board[dest].nil?
+    
+    self.move_to(dest) if valid
+    
+    valid
   end
   
   def perform_jump(dest)
+    
     possible_moves = get_diffs.map do |diff|
-      {
-        jumped_sq: [position.first + diff.first, position.last + diff.last],
-        dest_sq: [position.first + (2 * diff.first), position.last + (2 * diff.last)]
-      }
+      { jumped: [@position.first + diff.first, @position.last + diff.last],
+        dest: [@position.first + (2 * diff.first), @position.last + (2 * diff.last)] }
     end
     
-    possible_moves.any? do |move|
-      !board[move[:jumped_sq]].empty? &&
-         board[move[:jumped_sq]].color != @color &&
-         board[moved[:dest_sq]].empty?
+    selected_move = possible_moves.find do |move|
+       valid_jump?(move[:jumped], move[:dest]) && move[:dest] == dest
+     end
+    
+    unless selected_move.nil?
+      self.move_to(selected_move[:dest])
+      @board[selected_move[:jumped]].remove
     end
+    
+    !!selected_move
+  end
+  
+  def valid_jump?(jumped, dest)
+    @board[jumped].is_a?(Piece) && @board[jumped].color != @color && @board[dest].nil?
+  end
+  
+  def remove
+    @board[@position] = nil
+    @position = nil
+  end
+  
+  def move_to(coord)
+    self.remove
+    @board[coord] = self
+    @position = coord
+    self.promote if self.maybe_promote?
   end
   
   def get_diffs
-    DIFFS[:black] + DIFFS[:white] if @kinged 
-    DIFFS[@color]
+    if @kinged
+      DIFFS[:black] + DIFFS[:white]
+    else
+      DIFFS[@color]
+    end
   end
+  
+  def maybe_promote?
+    (@position.first == 0  && @color == :white) || (@position.first == 7 && @color == :black)
+  end
+  
+  def promote
+    @kinged = true
+  end
+  
+  def perform_moves!(seq)
+    seq.all? do |move|
+      
+    end 
   
 end
