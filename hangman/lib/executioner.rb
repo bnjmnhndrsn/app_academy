@@ -1,5 +1,5 @@
 require_relative './player'
-#a comment asdfasdf
+
 class Executioner < Player
   
   attr_accessor :word
