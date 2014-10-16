@@ -10,7 +10,7 @@ class Piece
     ]
   }
   
-  attr_reader :color, :kinged
+  attr_reader :color, :kinged, :position
   
   def initialize(color, position, board)
     @color, @position, @board, @kinged = color, position, board, false
@@ -80,8 +80,25 @@ class Piece
   end
   
   def perform_moves!(seq)
-    seq.all? do |move|
-      
-    end 
+    if seq.length == 1
+      raise InvalidMoveError unless (perform_slide(seq[0]) || perform_jump(seq[0]))
+    else
+      raise InvalidMoveError unless seq.all? { |move| perform_jump(move) }
+    end
+  end
   
+  def valid_move_seq?(seq)
+    duped_board = @board.dup
+    duped_piece = duped_board[@position]
+    begin
+      duped_piece.perform_moves!(seq)
+      true
+    rescue InvalidMoveError
+      return false
+    end
+  end
+  
+end
+
+class InvalidMoveError < RuntimeError
 end

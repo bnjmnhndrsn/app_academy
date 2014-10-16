@@ -128,8 +128,14 @@ describe Piece do
       piece.perform_slide([0, 0])
       expect(piece.kinged).to be_true
     end
-
      
+  end
+  
+  describe "perform moves!" do
+    it "should be able to perform one jump"
+    it "should be able to perform one step"
+    it "should be able to perform multiple jumps"
+    it "should raise error if move sequence is invalid"
   end
   
 end
