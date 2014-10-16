@@ -39,4 +39,17 @@ module ChessConstants
 
   DIAGONALS = [[1, 1], [-1, -1], [1, -1], [-1, 1]]
   STRAIGHTS = [[1, 0], [0, 1], [-1, 0], [0, -1]]
+
+  ALPHA_TO_NUMERIC = {
+    'a' => 0,
+    'b' => 1,
+    'c' => 2,
+    'd' => 3,
+    'e' => 4,
+    'f' => 5,
+    'g' => 6,
+    'h' => 7
+  }
+  
+  VALID_INPUT_CHARS = ["W", "A", "S", "D", " ", "P"]
 end
