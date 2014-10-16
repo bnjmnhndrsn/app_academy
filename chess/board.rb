@@ -9,21 +9,37 @@ require_relative 'chess_constants'
 require 'colorize'
 
 class Board
-  attr_accessor :grid, :selected
+  attr_accessor :selected
+  
+  def self.make_starting_board
+    self.new.populate_board
+  end
 
-  def self.create_board
+  def self.create_empty_grid
     Array.new(8) { Array.new(8) }
+  end
+  
+  def add_piece(position, piece)
   end
 
   def populate_board
     ChessConstants::DEFAULT_BOARD.each do |piece, colors|
       colors.each do |color, positions|
         positions.each do |pos|
-          self[pos.first, pos.last] = piece.new(self, pos, color)
+          self[pos] = piece.new(self, pos, color))
         end
       end
     end
   end
+  
+  def serialize
+    @grid.map.with_index do |row|
+      row.map do |space|
+        space.nil? ? ChessConstants::SKINS[nil] : 
+        ChessConstants::SKINS[space.color][space.class]
+      end
+    end
+  end 
   
   def to_s
     str = "  a b c d e f g h\n"
@@ -31,129 +47,98 @@ class Board
       "#{8 - i} " + row.map.with_index do |space, j|
         char = (space.nil? ? ChessConstants::SKINS[nil] : 
         ChessConstants::SKINS[space.color][space.class])
-        selected == [i, j] ? char.colorize(:white).on_black : char 
+        selected == [i, j] ? "0" : char 
       end.join(' ')
     end.join("\n")
-  end
+  end 
 
-  def initialize(setup = true)
-    @grid = Board.create_board
-    populate_board if setup
+  def initialize(grid)
+    @grid = grid || Board.create_empty_grid
     @selected = [6,4]
   end
-
-  def validate_move(color, from, to)
-    check_no_piece(from)
-    check_not_your_piece(color, from)
-    check_attack_self(from, to)
-
-    selected_move = self[from[0], from[1]].moves_on_board.find do |move|
-      move.destination == to
-    end
-
-    check_not_a_move(selected_move)
-    check_piece_in_way(selected_move)
+  
+  def valid_move?(from, to)
+    !attacking_self?(from, to) && on_board?(to)
   end
-
-  def check_not_your_piece(color, from)
-    x, y = from
-    raise MoveError.new("Isn't your piece!") if self[x, y].color != color
+  
+  def validate_from(from)
+    
   end
-
-  def check_no_piece(from)
-    x, y = from
-    raise MoveError.new("There's no piece there!") if self[x, y].nil?
-  end
-
-  def check_attack_self(from, to)
-    x, y = from
-    w, z = to
-    if !self[w, z].nil? && self[x, y].color == self[w, z].color
-      raise MoveError.new("You can't take your own piece, buddy.")
+  
+  def validate_to(from, to)
+    if @board.will_result_in_check?(turn, move.first, move.last)
+      raise MoveError.new("Don't check yourself before you wreck yourself.")
     end
   end
 
-  def check_not_a_move(move)
-    raise MoveError.new('Not a legal move for that piece.') if move.nil?
-  end
-
-  def check_piece_in_way(move)
-    unless move.sequence.all? { |pos| self[pos[0], pos[1]].nil? }
-      raise MoveError.new("There's a piece in the way!")
-    end
+  def attacking_self(from, to)
+    self[to].nil? || self[from].color == self[w, z].color
   end
 
   def move_piece!(from, to)
-    self[to[0], to[1]] = self[from[0], from[1]]
-    self[from[0], from[1]] = nil
-    self[to[0], to[1]].position = to
+    self[to] = self[from]
+    self[from] = nil
+    self[to].position = to
     self
   end
 
   def in_check?(color)
     opponent_color = (color == :white ? :black : :white)
     kings_location = king_position(color)
-    move_array = all_possible_moves(opponent_color).map(&:destination)
-    move_array.include?(kings_location)
+    moves = all_possible_moves(opponent_color)
+    moves.include?(kings_location)
+  end
+  
+  def search_pieces(&blk)
+    if block_given?
+      @grid.flatten.compact.find { |piece| blk.call(piece) }
+    else
+      @grid.flatten.compact
   end
 
   def all_possible_moves(color)
-    moves = []
-
-    @grid.flatten.compact.each do |piece|
-      piece.moves_on_board.each do |move|
-        begin
-          validate_move(color, piece.position, move.destination)
-          moves << move
-        rescue MoveError
-          next
-        end
-      end
-    end
-
-    moves
+    search_pieces { |piece| piece.color == color }.map(&:moves).flatten
   end
 
-  def will_result_in_check?(color, start, destination)
-    clone_board.move_piece!(start, destination).in_check?(color)
+  def will_result_in_check?(color, from, to)
+    clone_board.move_piece!(from, to).in_check?(color)
   end
 
   def king_position(color)
-    @grid.flatten.compact.find do |piece|
-      piece.color == color && piece.is_a?(King)
-    end.position
+    search_pieces do |piece| 
+      piece.color == color && piece.is_a?(King) 
+    end.first.position
   end
 
   def checkmate?(color)
     all_possible_moves(color).all? do |move|
-      will_result_in_check?(color, move.start, move.destination)
+      will_result_in_check?(color, move)
     end
   end
 
   def clone_board
-    clone = Board.new(false)
-
-    @grid.flatten.compact.each do |piece|
-      cloned_piece = piece.class.new(clone, piece.position.dup, piece.color)
-      cloned_piece.moved = cloned_piece.moved if cloned_piece.is_a?(Pawn)
-      clone[piece.position.first, piece.position.last] = cloned_piece
-
+    new_board = Board.create_empty_grid
+    
+    search_pieces.each do |piece|
+      new_piece = piece.class.new(new_board, piece.position.dup, piece.color)
+      new_piece.moved = piece.moved if piece.respond_to?(:moved)
+      new_board[new_piece.position] = cloned_piece
     end
-
-    clone
+    
+    new_board
   end
 
-  def [](x, y)
-    @grid[x][y]
+  def [](coord)
+    @grid[coord.first][coord.last]
   end
 
-  def []=(x, y, val)
-    @grid[x][y] = val
+  def []=(coord, val)
+    @grid[coord.first][coord.last] = val
   end
 
   def attacking?(pos1, pos2)
-    return false if self[pos1[0], pos1[1]].nil? || self[pos2[0], pos2[1]].nil?
-    self[pos1[0], pos1[1]].color != self[pos2[0], pos2[1]].color
+    return false if self[pos1].nil? || self[pos2].nil?
+    self[pos1].color != self[pos2].color
   end
 end
 

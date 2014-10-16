@@ -3,23 +3,17 @@ require_relative 'piece'
 class Pawn < Piece
   attr_accessor :moved
 
-  def initialize(board, position, color)
-    super
-    @moved = false
-  end
-
   def moves_on_board
-    advances, attacks = [single_advance], [attack_left, attack_right]
-    advances << double_advance unless moved
-
-    advances.keep_if do |mv|
-      on_board?(mv.destination) && !@board.attacking?(position, mv.destination)
+    moves = []
+    if valid_move?(single_advance)
+      moves << single_advance
+      moves << double_advance if moved && @board.valid_move?(double_advance)
+    end  
+    
+    moves += [attack_left, attack_right].select do |move|
+      @board.on_board?(move) && @board.attacking?(position, move)
     end
-    attacks.keep_if do |mv|
-      on_board?(mv.destination) && @board.attacking?(position, mv.destination)
-    end
 
-    advances + attacks
   end
 
   def direction
@@ -27,34 +21,24 @@ class Pawn < Piece
   end
 
   def single_advance
-    Move.new(position, [position.first + direction, position.last], [])
+    [position.first + direction, position.last]
   end
 
   def double_advance
-    new_move = Move.new
-
-    new_move.start = position
-    new_move.destination = [position.first + (2 * direction), position.last]
-    new_move.sequence = []
-    new_move.sequence << [position.first + direction, position.last]
-
-    new_move
+    [position.first + (2 * direction), position.last]
   end
 
   def attack_right
-    Move.new(position, [position.first + direction, position.last + 1], [])
+    [position.first + direction, position.last + 1]
   end
 
   def attack_left
-    Move.new(position, [position.first + direction, position.last - 1], [])
+    [position.first + direction, position.last - 1]
   end
-
-  def on_board?(position)
-    position.first.between?(0, 7) && position.last.between?(0, 7)
-  end
-
+  
   def position=(new_position)
     @position = new_position
     @moved = true
   end
+  
 end
