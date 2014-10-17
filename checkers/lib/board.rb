@@ -18,7 +18,7 @@ class Board
   def serialize
     @grid.map do |row|
        row.map do |square|
-         square.nil? ? "_" : square.color.to_s[0]
+         square.nil? ? "*" : square.color.to_s[0]
        end
      end
   end
@@ -35,6 +35,7 @@ class Board
     duped = Board.new
     find_all.each do |piece|
       duped[piece.position] = Piece.new(piece.color, piece.position, duped)
+      duped[piece.position].promote if piece.kinged
     end
     duped
   end
@@ -49,7 +50,7 @@ class Board
 
   def setup_pieces
     (0..7).each do |row|
-      col_values = (0..7).to_a.select { |col| col.odd? ? col.odd? : col.even? }
+      col_values = (0..7).to_a.select { |col| row.odd? ? col.odd? : col.even? }
       color = (row > 4 ? :black : :white)
       unless row.between?(3, 4)
         col_values.each do |col|

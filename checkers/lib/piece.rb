@@ -2,10 +2,10 @@ require 'debugger'
 class Piece
   
   DIFFS = {
-    black: [
+    white: [
       [1, -1], [1, 1]
     ],
-    white: [
+    black: [
       [-1, -1], [-1, 1]
     ]
   }
@@ -28,12 +28,40 @@ class Piece
     valid
   end
   
+  def can_jump_from_there?(moves)
+    duped = @board.dup
+    duped[@position].perform_moves!(moves)
+    jumps = duped[moves.last].possible_jumps.select do |move|
+      p move
+       valid_jump?(move[:jumped], move[:dest])
+    end
+    jumps.length > 0
+  end
+  
+  def possible_slides
+    get_diffs.map do |diff|
+        [@position.first + diff.first, @position.last + diff.last]
+    end.select do |move|
+      on_board?(move)
+    end
+  end
+  
+  def possible_jumps
+    get_diffs.map do |diff|
+          { jumped: [@position.first + diff.first, @position.last + diff.last],
+            dest: [@position.first + (2 * diff.first), @position.last + (2 * diff.last)] }
+    end.select do |move|
+      on_board?(move[:jumped]) && on_board?(move[:dest])
+    end
+  end
+  
+  def on_board?(pos)
+    pos.first.between?(0, 7) && pos.last.between?(0, 7)
+  end
+  
   def perform_jump(dest)
     
-    possible_moves = get_diffs.map do |diff|
-      { jumped: [@position.first + diff.first, @position.last + diff.last],
-        dest: [@position.first + (2 * diff.first), @position.last + (2 * diff.last)] }
-    end
+    possible_moves = possible_jumps
     
     selected_move = possible_moves.find do |move|
        valid_jump?(move[:jumped], move[:dest]) && move[:dest] == dest
@@ -48,7 +76,7 @@ class Piece
   end
   
   def valid_jump?(jumped, dest)
-    @board[jumped].is_a?(Piece) && @board[jumped].color != @color && @board[dest].nil?
+     @board[jumped].is_a?(Piece) && @board[jumped].color != @color && @board[dest].nil?
   end
   
   def remove
@@ -72,12 +100,21 @@ class Piece
   end
   
   def maybe_promote?
-    (@position.first == 0  && @color == :white) || (@position.first == 7 && @color == :black)
+    (@position.first == 7  && @color == :white) || (@position.first == 0 && @color == :black)
   end
   
   def promote
     @kinged = true
   end
+  
+  def perform_moves(seq)
+     if valid_move_seq?(seq)
+       perform_moves!(seq)
+     else
+       raise InvalidMoveError.new("You can't make that move!")
+     end
+  end
+  
   
   def perform_moves!(seq)
     if seq.length == 1
@@ -92,10 +129,10 @@ class Piece
     duped_piece = duped_board[@position]
     begin
       duped_piece.perform_moves!(seq)
-      true
     rescue InvalidMoveError
       return false
     end
+    true
   end
   
 end

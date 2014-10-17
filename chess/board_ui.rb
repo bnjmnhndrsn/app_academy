@@ -2,7 +2,7 @@ require 'io/console'
 
 class BoardUI
   
-  attr_accessor :grid, :selected, :cursor, :flash
+  attr_accessor :grid, :selected, :cursor, :flash, :title
   
   def initialize(size = 8)
     @size = size
@@ -10,6 +10,7 @@ class BoardUI
     @grid = nil
     @flash = nil
     @selected = []
+    @title = nil
   end
   
   def load(grid)
@@ -34,26 +35,42 @@ class BoardUI
       end.join(" " * spaces)
     end.join("\n")
     
+    puts title if title
     puts " #{first_row}\n#{rows}"
     puts message if message
   end
   
   def get_selection(message)
     @cursor ||= [0, 0]
-    selection = nil
-    until selection
+    action = nil
+    while action.nil?
       begin
         system("clear")
-        display(message: (@flash.nil? ? message : @nil))
+        display(message: (@flash.nil? ? message : @flash))
         input = STDIN.getch
-        selection = process_input(input)
-        @flash  = nil
+        action = process_input(input)
+        @flash = nil
       rescue InputError => e
         @flash = e.message
         retry
       end
     end
-    selection
+    action
+  end
+  
+  def ask_question(message)
+    begin
+      system("clear")
+      display(message: message)
+      input = STDIN.getch.downcase
+      raise InputError unless input =~ /[yn]/
+    rescue InputError => e
+      @flash = e.message
+      retry
+    end
+    
+    input == "y"
+    
   end
   
   def process_input(input)
@@ -70,12 +87,14 @@ class BoardUI
       @cursor = [i, (j + 1)  % @size]
     when "\r"
       return @cursor
+    when "\e"
+      return false
     when "\u0003"
       fail "quitting gracefully"
     else
-      raise InputError.new("Please use WASD to move and enter to select")
+      raise InputError.new("Please use WASD to move, enter to select.")
     end
-    false
+    nil
   end
 end
 

@@ -12,14 +12,14 @@ describe Board do
     
     it "should not change if dup is changed" do
       duped = board.dup
-      duped[[7, 0]].remove
-      expect(board[[7, 0]]).not_to be_nil
+      duped[[7, 1]].remove
+      expect(board[[7, 1]]).not_to be_nil
     end
     
     it "should have changes not affect pieces on old board" do
       duped = board.dup
-      duped[[5, 0]].promote
-      expect(board[[5, 0]].kinged).to be_false
+      duped[[5, 1]].promote
+      expect(board[[5, 1]].kinged).to be_false
     end
   end
   
