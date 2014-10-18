@@ -21,6 +21,12 @@ describe Board do
       duped[[5, 1]].promote
       expect(board[[5, 1]].kinged).to be_false
     end
+    
+    it "should have promoted pieces still be cloned" do
+      board[[5, 1]].promote
+      duped = board.dup
+      expect(board[[5, 1]].kinged).to be_true
+    end
   end
   
 end
