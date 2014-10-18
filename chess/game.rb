@@ -1,5 +1,5 @@
 require_relative 'board'
-require_relative 'board_ui'
+require_relative '../../shared/lib/board_ui'
 require 'io/console'
 
 class Game

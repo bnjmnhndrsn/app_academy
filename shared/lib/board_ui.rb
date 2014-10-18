@@ -17,14 +17,14 @@ class BoardUI
     @grid = grid
   end
   
-  def display(spaces: 1, message: nil)
+  def display(spaces: 1, message: nil, labels: true)
     raise "No grid to display!" if @grid.nil?
     
     first_row = ("a".."z").to_a[0...@size].join(" " * spaces)
     col_numbers = (1..@size).to_a.reverse
     
     rows = @grid.map.with_index do |row, i|
-       "#{col_numbers[i]} " + row.map.with_index do |space, j|
+       "#{col_numbers[i] if labels} " + row.map.with_index do |space, j|
         if [i, j] == @cursor
           "0"
         elsif @selected.include?([i, j])
@@ -36,7 +36,7 @@ class BoardUI
     end.join("\n")
     
     puts title if title
-    puts " #{first_row}\n#{rows}"
+    puts " #{first_row if labels}\n#{rows}"
     puts message if message
   end
   

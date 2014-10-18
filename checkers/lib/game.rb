@@ -1,5 +1,5 @@
 require_relative 'board'
-require_relative '../../chess/board_ui'
+require_relative '../../shared/lib/board_ui'
 
 class Game
   def run
