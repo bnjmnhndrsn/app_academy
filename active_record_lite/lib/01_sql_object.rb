@@ -1,23 +1,30 @@
 require_relative 'db_connection'
 require 'active_support/inflector'
+require 'byebug'
 # NB: the attr_accessor we wrote in phase 0 is NOT used in the rest
 # of this project. It was only a warm up.
 
 class SQLObject
   def self.columns
-    result = DBConnection.execute2(<<-SQL)
+    query = <<-SQL
       SELECT
         *
       FROM
-        cats
+        #{table_name}
     SQL
-    
-    result[0].map(&:to_sym)
+    DBConnection.execute2(query)[0].map(&:to_sym)
   end
   
-  
-
   def self.finalize!
+    self.columns.each do |column|
+      define_method(column) do
+        attributes[column]
+      end
+      
+      define_method("#{column}=") do |val|
+        attributes[column] = val
+      end
+    end
   end
 
   def self.table_name=(table_name)
@@ -29,38 +36,83 @@ class SQLObject
   end
 
   def self.all
-    # ...
+    query = <<-SQL
+    SELECT
+      #{table_name}.*
+    FROM
+      #{table_name}
+    SQL
+   results = DBConnection.execute(query)
+   self.parse_all(results)
   end
 
   def self.parse_all(results)
-    # ...
+    results.map do |result|
+      self.new(result)
+    end
   end
 
   def self.find(id)
-    # ...
+    query = <<-SQL
+    SELECT
+      #{table_name}.*
+    FROM
+      #{table_name}
+    WHERE
+      #{table_name}.id = ? 
+    SQL
+   result = DBConnection.execute(query, id).first
+   p self.new(result)
   end
 
   def initialize(params = {})
-    # ...
+    params.each do |key, val|
+      attr_name = key.to_sym
+      
+      unless self.class.columns.include?(attr_name)
+        raise "unknown attribute '#{attr_name}'"
+      end
+      
+      self.send("#{attr_name}=", val)
+    
+    end
   end
 
   def attributes
-    # ...
+    @attributes ||= {}
   end
 
   def attribute_values
-    # ...
+    self.class.columns.map do |column|
+      self.send(column)
+    end
   end
 
   def insert
-    # ...
+    query = <<-SQL
+    INSERT INTO
+    #{self.class.table_name} (#{self.class.columns.join ","})
+    VALUES
+    (#{(["?"] * attribute_values.length).join ","})
+    SQL
+    DBConnection.execute(query, *attribute_values)
+    self.id = DBConnection.last_insert_row_id
   end
 
   def update
-    # ...
+    query = <<-SQL
+    UPDATE
+    #{self.class.table_name}
+    SET
+    #{self.class.columns.map {|col| "#{col} = ?"}.join ","}
+    WHERE
+    id = ?
+    SQL
+    
+    DBConnection.execute(query, *attribute_values, id)  
   end
 
   def save
-    # ...
+    if id.nil? then insert else update end
   end
 end
