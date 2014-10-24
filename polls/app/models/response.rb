@@ -29,17 +29,27 @@ class Response < ActiveRecord::Base
     source: :poll
   )
   
+  def sibling2 
+    
+  end
+  
   def sibling_responses
-    if Response.exists?(self) # persisted? new_record?
-      question.responses.where("responses.id != ?", id)
+    r_query  = Response
+      .select("responses.id, responses.answer_choice_id, responses.respondent_id")
+      .joins("JOIN answer_choices ON responses.answer_choice_id = answer_choices.id")
+      .joins("JOIN questions on answer_choices.question_id = questions.id")
+      .joins("JOIN answer_choices AS answer_choices_b ON questions.id = answer_choices_b.question_id")
+      .where("answer_choices_b.id = ?", answer_choice_id)
+      
+    if persisted?
+      r_query.where("responses.id != ?", id)
     else
-      question.responses
+      r_query
     end
   end
   
   def respondent_has_not_already_answered_question
-    unless sibling_responses
-            .where("respondent_id = ?", self.respondent_id).empty?
+    unless sibling_responses.where("respondent_id = ?", respondent_id).empty?
       errors[:base] << "Respondent has already responded."
     end
   end
