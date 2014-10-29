@@ -1,0 +1,22 @@
+ <form action="/cat_rental_requests" method="POST">
+  <label>Cat
+    <select  name="cat_rental_request[cat_id]">
+        <option>-----</option>
+        <% (@cat_rental_request.cat_id.nil? ? Cat::all : [Cat.find(@cat_rental_request.cat_id)]).each do |cat|%>
+        <%= content_tag("option", cat.name, value: cat.id, selected: (@cat_rental_request.cat_id == cat.id)) %>
+        <% end %>
+      </select>
+  </label><br />
+
+
+  <label>Start Date
+    <input value="<%=@cat_rental_request.start_date%>" type="date" name="cat_rental_request[start_date]">
+  </label><br />
+
+  <label>End Date
+    <input value="<%=@cat_rental_request.end_date%>" type="date" name="cat_rental_request[end_date]">
+  </label><br />
+
+<input type="submit">
+
+</form>

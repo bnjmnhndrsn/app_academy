@@ -1,0 +1,7 @@
+<form action="<%=cat_rental_request_path(cat_rental_request.id)%>" method="POST">
+  <input type="hidden" name="_method" value="PUT">
+  <input type="hidden"
+        name="cat_rental_request[status]"
+        value="<%= status_action %>" >
+  <input value="<%= status_action %>" type="submit">
+</form>

@@ -1,0 +1,35 @@
+<h1><%="#{@cat.name}"%></h1>
+
+<table>
+  <tr>
+    <th>Attribute</th>
+    <th>Value</th>
+  </tr>
+
+  <% [:birth_date, :color, :sex, :description].each do |attr|%>
+    <tr>
+      <td><%= "#{attr.to_s}:" %>
+      <td><%= "#{@cat.send(attr)}"%></td>
+    </tr>
+  <% end %>
+</table>
+
+<table>
+  <tr>
+    <th>Start Date</th>
+    <th>End Date</th>
+    <th>Approve</th>
+    <th>Deny</th>
+  </tr>
+
+  <% @cat.cat_rental_requests.each do |request|%>
+    <tr>
+      <td><%= "#{request.start_date}" %></td>
+      <td><%= "#{request.end_date}"%></td>
+      <td><%= render partial: 'button', locals: {cat_rental_request: request,
+        status_action: 'APPROVE'} if request.pending? %></td>
+     <td><%= render partial: 'button', locals: {cat_rental_request: request,
+       status_action: 'DENY'} if request.pending? %></td>
+    </tr>
+  <% end %>
+</table>
