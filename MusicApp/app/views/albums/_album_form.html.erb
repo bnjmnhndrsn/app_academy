@@ -1,0 +1,20 @@
+<form action="<%= action %>" method="POST">
+	<%= authenticity_field %>
+	<input type="hidden" name="_method" value="<%= method %>">
+	<input type="text" name="album[name]" value="<%= album.name %>">
+	<br>
+	<select name="album[band_id]">
+		<% Band.all.each do |band| %>
+			<% options = { value: band.id, selected: (band.id == album.band_id) } %>
+			<%= content_tag("option", band.name, options) %>
+		<% end %>
+	</select>
+	<br>
+	<% ["studio", "live"].each do |album_type| %>
+		<% options = { value: album_type, id: "album_type_#{album_type}", type: "radio",
+			 checked: (album.album_type == album_type), name: "album[album_type]" } %>
+		<%= tag("input", options) %>
+		<%= content_tag("label", album_type, for: "album_type_#{album_type}")%>
+	<% end %>
+	<input type="submit" value="Submit!" >
+</form>

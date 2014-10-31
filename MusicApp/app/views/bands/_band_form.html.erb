@@ -1,0 +1,6 @@
+<form action="<%= action %>" method="POST">
+	<%= authenticity_field %>
+	<input type="text" placeholder="Name" name="band[name]" value="<%= band.name %>">
+	<input type="hidden" name="_method" value="<%= method %>">
+	<input type="submit" value="submit">
+</form>

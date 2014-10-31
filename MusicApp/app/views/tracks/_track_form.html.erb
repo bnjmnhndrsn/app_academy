@@ -1,0 +1,23 @@
+<form action="<%= action %>" method="POST">
+	<%= authenticity_field %>
+	<input type="hidden" name="_method" value="<%= method %>">
+	<input type="text" placeholder="Name" name="track[name]" value="<%= track.name %>">
+	<br>
+	<select name="track[album_id]">
+		<% Album.all.each do |album| %>
+			<% options = { value: album.id, selected: (album.id == track.album_id) } %>
+			<%= content_tag("option", album.name, options) %>
+		<% end %>
+	</select>
+	<br>
+	<% ["bonus", "regular"].each do |track_type| %>
+		<% options = { value: track_type, id: "track_type_#{track_type}", type: "radio",
+			 checked: (track.track_type == track_type), name: "track[track_type]" } %>
+		<%= tag("input", options) %>
+		<%= content_tag("label", track_type, for: "track_type_#{track_type}")%>
+	<% end %>
+	<br>
+	<textarea placeholder="Row, row your boat, etc." name="track[lyrics]"><%= track.lyrics %></textarea>
+	<br>
+	<input type="submit" value="Submit!" >
+</form>

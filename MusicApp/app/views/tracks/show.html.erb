@@ -1,0 +1,19 @@
+<div class="show-header">
+	<h1><%= @track.name %></h1>
+	<%= link_to "Edit", edit_track_path(@track.id) %>
+	<%= destroy_button(track_path(@track.id), "Delete") %>
+	<h3>On <%= link_to @track.album.name, album_path(@track.album.id) %> </h3>
+	<h4><%= @track.track_type %> track</h4>
+</div>
+<div class="show-content">
+	<% unless @track.lyrics.blank? %>
+		<h2>Lyrics</h2>
+			<%= ugly_lyrics(@track.lyrics) %>
+		</div>
+	<% end %>
+	<h2>Notes</h2>
+	<%= render @track.notes %>
+	</h4>Add a new note!</h4>
+	<%= render partial: "notes/form", locals: { track: @track } %>
+</div>
+	

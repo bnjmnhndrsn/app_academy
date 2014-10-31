@@ -1,0 +1,6 @@
+<form action="<%= notes_path %>" method="POST">
+	<%= authenticity_field %>
+	<input type="hidden" name="note[track_id]" value="<%= track.id %>">
+	<textarea name="note[content]"></textarea>
+	<input type="submit" value="Submit!">
+</form>

@@ -25,4 +25,6 @@ class SQLObject
 end
 
 class Relation
+
+  
 end

@@ -1,0 +1,15 @@
+<div class="show-header">
+	<h1><%= @band.name %></h1>
+	<%= link_to "Edit", edit_band_path(@band.id) %>
+	<%= destroy_button(band_path(@band.id), "Delete") %>
+</div>
+<div class="show-contents">
+	<h2>Albums</h2>
+	<ul>
+		<%= render @band.albums %>
+		<li><%= link_to "Add another", new_band_album_path(@band.id) %> </li>
+	</ul>
+</div>
+<div class="show-nav">
+<%= link_to "Index", bands_path %>
+</div>

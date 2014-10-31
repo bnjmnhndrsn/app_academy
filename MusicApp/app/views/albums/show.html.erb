@@ -1,0 +1,14 @@
+<div class="show-header">
+	<h1><%= @album.name %></h1>
+	<%= link_to "Edit", edit_album_path(@album.id) %>
+	<%= destroy_button(album_path(@album.id), "Delete") %>
+</div>
+<div class="show-content">
+	<h3>By <%= link_to @album.band.name, band_path(@album.band.id) %> </h3>
+	<h4><%= @album.album_type %> album</h4>
+	<h2>Tracks</h2>
+	<ul>
+		<%= render @album.tracks %>
+		<li><%= link_to "Add another", new_album_track_path(@album.id) %></li>
+	</ul>
+</div>
