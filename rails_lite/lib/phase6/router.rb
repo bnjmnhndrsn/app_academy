@@ -1,3 +1,5 @@
+require 'byebug'
+
 module Phase6
   class Route
     attr_reader :pattern, :http_method, :controller_class, :action_name
