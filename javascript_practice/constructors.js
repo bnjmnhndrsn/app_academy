@@ -63,6 +63,9 @@ Course.prototype.conflictsWith = function(course) {
   return conflicting;
 }
 
+module.exports.Course = Course;
+module.exports.Student = Student;
+
 
 duncan = new Student("Duncan", "Skinner")
 bio = new Course("bio101", "Biology", 3, ["mon","wed"], 5)

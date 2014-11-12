@@ -1,0 +1,145 @@
+body {
+  margin: 0;
+  position: relative;
+  font-size: 10pt;
+  font-family: arial;
+  
+}
+
+.top-nav {
+  padding: 20px 30px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  vertical-align: center;
+}
+
+
+.center {
+  width: 800px;
+  margin: 60 auto;
+  padding-top: 80px;
+  text-align: center;
+  
+}
+
+.center-image {
+  position: relative;
+}
+
+#blue-squiggly {
+  position: absolute;
+  top: 135;
+  left: 580;
+}
+
+.search-container {
+  padding-top: 20px;
+  position: relative;
+}
+
+.search-bar {
+  width: 550px;
+  height: 30px;
+}
+
+#microphone {
+  background-image: url('./microphone.gif');
+  background-size: contain;
+  width: 13px;
+  height: 19px;
+  opacity: .5;
+  position: absolute;
+  top: 25px;
+  right: 131px;
+}
+
+
+#microphone .tool-tip {
+  position: relative;
+  width: 110px;
+  height: 20px;
+  line-height: 20px;
+  top: 25px;
+  left: -45px;
+  display: none;
+  background-color: black;
+  color: white;
+  box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
+  font-size: 90%;
+}
+
+#microphone:hover > .tool-tip {
+  display: block;
+}
+
+#microphone:hover {
+  opacity: 1;
+}
+
+.button-bar {
+  padding-top: 15px;
+}
+
+.search-button {
+  margin-left: 10px;
+  padding:6px 8px;
+  font-weight: bold;
+  border-radius: 2px;
+  background-color: #f1f1f1;
+  box-shadow: none;
+  border: 1px #B6B6B6 solid;
+  color: rgb(68, 68, 68);
+}
+
+.search-button:hover {
+  border-color: #888888;
+}
+
+.message-bar {
+  padding-top: 30px;
+}
+
+.message-bar > a {
+  text-decoration: none;
+}
+
+.bottom-nav {
+  height: 40px;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #D6D6D6;
+  vertical-align: center;
+  line-height: 30px;
+  border: 1px #B6B6B6 solid;
+}
+
+.nav-item {
+  display: inline-block;
+  padding: 0 10px;
+  vertical-align: middle;
+}
+
+.nav-item > img {
+  line-height: 30px;
+}
+
+.nav-right {
+  float: right;
+}
+
+.nav-left {
+  float: left;
+}
+
+.button {
+  background-color: #0099FF;
+  color: white;
+  height: 30px;
+  line-height: 30px;
+  border-radius: 2px;
+}
