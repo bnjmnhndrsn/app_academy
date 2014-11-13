@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Snake</title>
+    <link rel="stylesheet" type="text/css" href="./css/snake.css">
+  </head>
+  <body>
+    <button id="start">Start</button>
+    
+    <div id="container">
+    </div>
+    <script src="./js/jquery-2.1.1.js"></script>
+    <!-- Whackjobs at GithubPages don't understand symlinks... -->
+    <script src="./js/snake.js"></script>
+    <script src="./js/snake-view.js"></script>
+
+    <script>
+    var sv = new SnakeView($("#container"), 10);
+      $("#start").click(function(event){ 
+        if (sv.board) {
+          sv.end();
+        }       
+        sv.run();
+        $(this).text("restart")
+      })
+    </script>
+  </body>
+</html>

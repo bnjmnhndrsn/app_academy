@@ -1,0 +1,23 @@
+#container {
+  width: 210px;
+  height: 210px;
+  border-top: 1px solid black;
+  border-left: 1px solid black;
+}
+
+.square {
+  float: left;
+  width: 20px;
+  height: 20px;
+  border-right: 1px solid black;
+  border-bottom: 1px solid black; 
+}
+
+.snake {
+  background-color: black;
+}
+
+.apple {
+  background-color: green;
+}
+

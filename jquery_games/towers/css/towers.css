@@ -1,0 +1,10 @@
+.tower {
+  background-color: lightgray;
+}
+.selected {
+  background-color: cadetblue;
+}
+
+.tower:hover {
+  background-color: red;
+}
